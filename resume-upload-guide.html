@@ -1,0 +1,51 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/resume-upload-guide.html b/resume-upload-guide.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..7c48caa194ebc1c64775cf7c9f95d14fa7c82cb2
+--- /dev/null
++++ b/resume-upload-guide.html
+@@ -0,0 +1,41 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>How to Upload Resumes | Cara Brown</title>
++    <link href="css/bootstrap.min.css" rel="stylesheet" />
++    <link href="styles.css" rel="stylesheet" />
++  </head>
++  <body>
++    <main class="container py-5">
++      <a href="index.html" class="btn btn-sm btn-outline-secondary mb-4">← Back to hub</a>
++      <h1>How to upload your resumes</h1>
++      <p class="text-secondary">Use this process to safely add resume files and extract content for the cover-letter generator.</p>
++
++      <div class="card shadow-sm mb-3">
++        <div class="card-body">
++          <h2 class="h5">Step 1: Place files in this project</h2>
++          <p>Create a <code>resumes/</code> folder in your site project and upload your PDF or DOCX files there.</p>
++          <pre class="bg-light p-3 rounded mb-0">/workspace/Bootstrap/resumes/
++  - Cara_Brown_Resume_Service_Design.pdf
++  - Cara_Brown_Resume_Chief_of_Staff.docx</pre>
++        </div>
++      </div>
++
++      <div class="card shadow-sm mb-3">
++        <div class="card-body">
++          <h2 class="h5">Step 2: Copy/paste key bullets</h2>
++          <p>For the current generator, paste key achievements directly into the “Your achievements” box so it can personalize quickly.</p>
++        </div>
++      </div>
++
++      <div class="card shadow-sm">
++        <div class="card-body">
++          <h2 class="h5">Step 3: Optional next upgrade</h2>
++          <p>Add server-side parsing (PDF/DOCX) so achievements are extracted automatically and reusable across tools.</p>
++        </div>
++      </div>
++    </main>
++  </body>
++</html>
+ 
+EOF
+)
