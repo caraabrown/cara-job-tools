@@ -1,0 +1,43 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/styles.css b/styles.css
+new file mode 100644
+index 0000000000000000000000000000000000000000..77abf3f065ac65e1987c4896677b9f2bf5234ef3
+--- /dev/null
++++ b/styles.css
+@@ -0,0 +1,33 @@
++:root {
++  --cara-navy: #0f1c2e;
++  --cara-gold: #b78a31;
++  --cara-teal: #2b7a78;
++  --cara-light: #f5f7fb;
++}
++body {
++  background-color: var(--cara-light);
++}
++.hero-gradient {
++  background: linear-gradient(120deg, var(--cara-navy), #1f3a5f);
++}
++.section-title {
++  letter-spacing: 0.02em;
++}
++.card-hover:hover {
++  transform: translateY(-2px);
++  transition: transform 150ms ease;
++}
++.metric-card {
++  border-left: 4px solid var(--cara-teal);
++}
++.badge-soft {
++  background: rgba(43, 122, 120, 0.14);
++  color: #1b5453;
++}
++footer a {
++  text-decoration: none;
++}
++.result-box {
++  min-height: 280px;
++  white-space: pre-wrap;
++}
+ 
+EOF
+)
