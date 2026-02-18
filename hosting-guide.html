@@ -1,0 +1,72 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/hosting-guide.html b/hosting-guide.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..5d0b073e363f3ac1c1071f1891df76575e5c656a
+--- /dev/null
++++ b/hosting-guide.html
+@@ -0,0 +1,62 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>Where to Place Pages in Hosting | Cara Brown</title>
++    <link href="css/bootstrap.min.css" rel="stylesheet" />
++    <link href="styles.css" rel="stylesheet" />
++  </head>
++  <body>
++    <main class="container py-5">
++      <a href="index.html" class="btn btn-sm btn-outline-secondary mb-4">← Back to hub</a>
++      <h1>Where to place these pages in hosting</h1>
++      <p class="text-secondary">Short answer: upload all HTML files to your site’s web root so they live beside your homepage.</p>
++
++      <div class="card shadow-sm mb-3">
++        <div class="card-body">
++          <h2 class="h5">Recommended structure (root folder)</h2>
++          <pre class="bg-light p-3 rounded mb-0">public_html/ or www/ or site root/
++  index.html
++  styles.css
++  interview-story-bank.html
++  cover-letter-generator.html
++  service-maturity-quiz.html
++  newsletter-landing.html
++  trash-dash-concept.html
++  resume-upload-guide.html
++  hosting-guide.html
++  css/
++  js/</pre>
++        </div>
++      </div>
++
++      <div class="card shadow-sm mb-3">
++        <div class="card-body">
++          <h2 class="h5">If your host is Squarespace / Wix / Webflow</h2>
++          <p>These platforms usually do not allow raw multi-file uploads in the same way. Use one of these options:</p>
++          <ul>
++            <li>Recreate each page as native platform pages and copy content from these files.</li>
++            <li>Or host this mini-site separately on Netlify/Vercel/GitHub Pages and link from your main domain (for example: <code>tools.caraabrown.com</code>).</li>
++          </ul>
++        </div>
++      </div>
++
++      <div class="card shadow-sm mb-3">
++        <div class="card-body">
++          <h2 class="h5">If your host uses cPanel or FTP</h2>
++          <ol class="mb-0">
++            <li>Open File Manager or your FTP client.</li>
++            <li>Go to <code>public_html</code> (or your domain root folder).</li>
++            <li>Upload all files and folders from this project root.</li>
++            <li>Visit <code>https://caraabrown.com/index.html</code> and test each page link.</li>
++          </ol>
++        </div>
++      </div>
++
++      <div class="alert alert-info">
++        If you tell me your exact host (Squarespace, Wix, Webflow, GoDaddy cPanel, Netlify, etc.), I can give you exact click-by-click steps.
++      </div>
++    </main>
++  </body>
++</html>
+ 
+EOF
+)
