@@ -1,0 +1,88 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/interview-story-bank.html b/interview-story-bank.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..074844dde6a658d4caf13bcb3033a82b0f2de3d2
+--- /dev/null
++++ b/interview-story-bank.html
+@@ -0,0 +1,78 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>Interview Story Bank | Cara Brown</title>
++    <link href="css/bootstrap.min.css" rel="stylesheet" />
++    <link href="styles.css" rel="stylesheet" />
++  </head>
++  <body>
++    <main class="container py-5">
++      <a href="index.html" class="btn btn-sm btn-outline-secondary mb-4">← Back to hub</a>
++      <h1 class="mb-3">Interview Story Bank (STAR/CAR)</h1>
++      <p class="text-secondary">Use these stories for Service Designer, Design Strategist, and Chief of Staff interviews. Replace bracketed sections with your exact numbers and outcomes.</p>
++
++      <div class="accordion" id="storyBank">
++        <div class="accordion-item">
++          <h2 class="accordion-header"><button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#leadership">Leadership & Influence</button></h2>
++          <div id="leadership" class="accordion-collapse collapse show" data-bs-parent="#storyBank">
++            <div class="accordion-body">
++              <strong>Story: Aligning skeptical stakeholders around a cross-agency service redesign</strong>
++              <ul>
++                <li><strong>Situation:</strong> Departments had conflicting success metrics and stalled implementation.</li>
++                <li><strong>Task:</strong> Create shared ownership and secure executive approval for a single roadmap.</li>
++                <li><strong>Action:</strong> Facilitated evidence-led workshops, translated insights into decision-ready options, and set governance rituals.</li>
++                <li><strong>Result:</strong> Delivered agreement in [X weeks], unlocked [budget/resources], and reduced delivery risk by [metric].</li>
++              </ul>
++            </div>
++          </div>
++        </div>
++
++        <div class="accordion-item">
++          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#serviceDesign">Service Design Craft</button></h2>
++          <div id="serviceDesign" class="accordion-collapse collapse" data-bs-parent="#storyBank">
++            <div class="accordion-body">
++              <strong>Story: Designing a resident-centered reporting flow for illegal dumping (Trash Dash)</strong>
++              <ul>
++                <li><strong>Context:</strong> Residents faced a fragmented reporting process and slow resolution loops.</li>
++                <li><strong>Action:</strong> Mapped current-state journey, identified policy and operational blockers, prototyped a mobile-first reporting flow.</li>
++                <li><strong>Result:</strong> Increased report completion rates by [X%], improved route triage speed by [Y%], and improved resident trust signals.</li>
++              </ul>
++            </div>
++          </div>
++        </div>
++
++        <div class="accordion-item">
++          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#strategy">Strategy & Operations</button></h2>
++          <div id="strategy" class="accordion-collapse collapse" data-bs-parent="#storyBank">
++            <div class="accordion-body">
++              <strong>Story: Building an operating cadence for leadership (Chief of Staff competency)</strong>
++              <ul>
++                <li><strong>Challenge:</strong> Strategic priorities were changing weekly with no shared source of truth.</li>
++                <li><strong>Action:</strong> Implemented planning rituals, decision logs, KPI dashboards, and exec readouts.</li>
++                <li><strong>Result:</strong> Improved decision turnaround from [X days] to [Y days], and increased delivery predictability.</li>
++              </ul>
++            </div>
++          </div>
++        </div>
++
++        <div class="accordion-item">
++          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#change">Change Management</button></h2>
++          <div id="change" class="accordion-collapse collapse" data-bs-parent="#storyBank">
++            <div class="accordion-body">
++              <strong>Story: Embedding service design capability in a legacy organization</strong>
++              <ul>
++                <li><strong>Situation:</strong> Delivery teams were shipping outputs without outcome metrics.</li>
++                <li><strong>Action:</strong> Created playbooks, coached team leads, and introduced lightweight service quality gates.</li>
++                <li><strong>Result:</strong> Increased adoption to [X teams], reduced rework by [Y%], and improved confidence in roadmap commitments.</li>
++              </ul>
++            </div>
++          </div>
++        </div>
++      </div>
++    </main>
++
++    <script src="js/bootstrap.bundle.min.js"></script>
++  </body>
++</html>
+ 
+EOF
+)
