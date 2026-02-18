@@ -1,0 +1,281 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/cover-letter-generator.html b/cover-letter-generator.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..91f2a3dd02abe4485346ec830c39c6dca83f7e02
+--- /dev/null
++++ b/cover-letter-generator.html
+@@ -0,0 +1,271 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>Job Search Tool (ATS + Cover Letter) | Cara Brown</title>
++    <link href="css/bootstrap.min.css" rel="stylesheet" />
++    <link href="styles.css" rel="stylesheet" />
++  </head>
++  <body>
++    <main class="container py-5">
++      <a href="index.html" class="btn btn-sm btn-outline-secondary mb-4">← Back to hub</a>
++      <h1>Job Search Tool: ATS Match + Cover Letter + Q&A</h1>
++      <p class="text-secondary">
++        Paste one job description and up to three resume versions. The tool will pick the best-matching resume,
++        return an ATS match %, generate a cover letter, answer why you chose the role/why you're a fit, and answer
++        one custom question.
++      </p>
++
++      <div class="row g-4">
++        <div class="col-lg-6">
++          <label class="form-label fw-semibold" for="jobDescription">Target job description</label>
++          <textarea id="jobDescription" class="form-control" rows="10" placeholder="Paste full job description..."></textarea>
++
++          <div class="mt-4">
++            <h2 class="h5">Resume versions (paste text)</h2>
++            <p class="small text-secondary mb-2">Tip: paste plain text from each resume variant (Service Design, Design Strategy, Chief of Staff).</p>
++
++            <label class="form-label" for="resumeName1">Resume 1 name</label>
++            <input id="resumeName1" class="form-control mb-2" value="Service Designer Resume" />
++            <label class="form-label small" for="resumeUrl1">Resume 1 URL (optional, public .txt)</label>
++            <input id="resumeUrl1" class="form-control mb-2" placeholder="https://yourdomain.com/Resumes/service-designer.txt" />
++            <textarea id="resumeText1" class="form-control mb-3" rows="7" placeholder="Paste resume text..."></textarea>
++
++            <label class="form-label" for="resumeName2">Resume 2 name</label>
++            <input id="resumeName2" class="form-control mb-2" value="Design Strategist Resume" />
++            <label class="form-label small" for="resumeUrl2">Resume 2 URL (optional, public .txt)</label>
++            <input id="resumeUrl2" class="form-control mb-2" placeholder="https://yourdomain.com/Resumes/design-strategist.txt" />
++            <textarea id="resumeText2" class="form-control mb-3" rows="7" placeholder="Paste resume text..."></textarea>
++
++            <label class="form-label" for="resumeName3">Resume 3 name</label>
++            <input id="resumeName3" class="form-control mb-2" value="Chief of Staff Resume" />
++            <label class="form-label small" for="resumeUrl3">Resume 3 URL (optional, public .txt)</label>
++            <input id="resumeUrl3" class="form-control mb-2" placeholder="https://yourdomain.com/Resumes/chief-of-staff.txt" />
++            <textarea id="resumeText3" class="form-control" rows="7" placeholder="Paste resume text..."></textarea>
++          </div>
++
++          <div class="small text-secondary mt-3">If URLs are provided, click "Load Resume URLs" first. Use public plain-text (.txt) links.</div>
++          <button id="loadUrlsBtn" class="btn btn-outline-secondary mt-2 me-2">Load Resume URLs</button>
++          <button id="runToolBtn" class="btn btn-primary mt-2">Run ATS + Generate documents</button>
++        </div>
++
++        <div class="col-lg-6">
++          <div class="mb-3">
++            <label class="form-label fw-semibold">ATS result</label>
++            <div id="atsOutput" class="result-box border rounded p-3 bg-white"></div>
++          </div>
++
++          <div class="mb-3">
++            <label class="form-label fw-semibold">Why this job + why I'm a fit</label>
++            <div id="fitOutput" class="result-box border rounded p-3 bg-white"></div>
++          </div>
++
++          <div>
++            <label class="form-label fw-semibold">Cover letter draft</label>
++            <div id="coverLetterOutput" class="result-box border rounded p-3 bg-white"></div>
++          </div>
++        </div>
++      </div>
++
++      <section class="mt-5">
++        <h2 class="h4">Ask a custom application question</h2>
++        <div class="row g-3 align-items-end">
++          <div class="col-lg-9">
++            <label for="customQuestion" class="form-label">Your question</label>
++            <textarea id="customQuestion" class="form-control" rows="3" placeholder="Example: How should I explain moving from service design into chief of staff scope?"></textarea>
++          </div>
++          <div class="col-lg-3">
++            <button id="answerQuestionBtn" class="btn btn-outline-primary w-100">Generate answer</button>
++          </div>
++        </div>
++        <div class="mt-3">
++          <label class="form-label fw-semibold">Answer</label>
++          <div id="questionOutput" class="result-box border rounded p-3 bg-white"></div>
++        </div>
++      </section>
++    </main>
++
++    <script>
++      const STOPWORDS = new Set([
++        'the', 'and', 'for', 'with', 'that', 'this', 'from', 'you', 'your', 'our', 'are', 'was', 'were', 'will',
++        'have', 'has', 'had', 'into', 'across', 'through', 'about', 'their', 'they', 'them', 'its', 'who', 'what',
++        'where', 'when', 'how', 'can', 'may', 'not', 'but', 'all', 'any', 'per', 'job', 'role', 'team', 'work'
++      ]);
++
++      function tokenize(text) {
++        return text
++          .toLowerCase()
++          .replace(/[^a-z0-9\s]/g, ' ')
++          .split(/\s+/)
++          .filter((word) => word.length >= 4 && !STOPWORDS.has(word));
++      }
++
++      function uniqueKeywords(text) {
++        return [...new Set(tokenize(text))];
++      }
++
++      function computeMatch(jobDescription, resumeText) {
++        const jdKeywords = uniqueKeywords(jobDescription);
++        const resumeKeywords = new Set(uniqueKeywords(resumeText));
++        const matched = jdKeywords.filter((word) => resumeKeywords.has(word));
++        const missing = jdKeywords.filter((word) => !resumeKeywords.has(word));
++
++        const baseScore = jdKeywords.length ? (matched.length / jdKeywords.length) * 100 : 0;
++
++        const metricSignals = ['%', 'kpi', 'sla', 'reduced', 'increased', 'improved', 'saved', 'faster'];
++        const metricBoost = metricSignals.some((signal) => resumeText.toLowerCase().includes(signal)) ? 4 : 0;
++        const leadershipBoost = resumeText.toLowerCase().includes('executive') || resumeText.toLowerCase().includes('cross-functional') ? 3 : 0;
++
++        const score = Math.min(99, Math.round(baseScore + metricBoost + leadershipBoost));
++        return { score, matched, missing, jdKeywords };
++      }
++
++      function firstNonEmptyLines(text, max = 6) {
++        return text
++          .split('\n')
++          .map((line) => line.trim())
++          .filter(Boolean)
++          .slice(0, max);
++      }
++
++      function buildResumeEdits(resumeText, missingKeywords) {
++        const lines = firstNonEmptyLines(resumeText, 8);
++        const keywords = missingKeywords.slice(0, Math.max(6, lines.length));
++
++        if (!lines.length) {
++          return 'Paste resume text to receive line-by-line edits.';
++        }
++
++        const edits = lines.map((line, index) => {
++          const keyword = keywords[index] || 'service';
++          return `Line ${index + 1}\nCurrent: ${line}\nEdit: Rewrite to include "${keyword}" and a metric. Example: "Led ${keyword} initiative across [X teams], improving [KPI] by [Y%]."`;
++        });
++
++        return edits.join('\n\n');
++      }
++
++      function buildFitNarrative(jobDescription, bestResumeName, bestMatch) {
++        const priorities = firstNonEmptyLines(jobDescription, 3);
++        const matchedPreview = bestMatch.matched.slice(0, 8).join(', ') || 'service design, strategy, operations';
++
++        return `1) Why I chose this role:\nI chose this role because it sits at the intersection of strategy, delivery, and organizational impact—exactly where I do my best work in senior service design and transformation contexts.\n\n2) Why I am a strong fit:\nMy ${bestResumeName} aligns with your stated priorities, including:\n- ${priorities.join('\n- ')}\n\nI bring evidence in these aligned areas: ${matchedPreview}. I also bring executive-level facilitation, cross-functional delivery leadership, and measurable outcomes orientation.`;
++      }
++
++      function buildCoverLetter(jobDescription, bestResumeName, bestMatch, bestResumeText) {
++        const jdLines = firstNonEmptyLines(jobDescription, 4);
++        const evidenceLines = firstNonEmptyLines(bestResumeText, 5);
++        const matchedTerms = bestMatch.matched.slice(0, 10).join(', ');
++
++        return `Dear Hiring Team,\n\nI am excited to apply for this role. I am especially drawn to this opportunity because it requires strategic leadership, service transformation, and cross-functional execution at a senior level.\n\nAfter reviewing the position, I see priority areas that strongly match my background:\n- ${jdLines.join('\n- ')}\n\nUsing my ${bestResumeName}, my current ATS alignment is ${bestMatch.score}%, with strong overlap in: ${matchedTerms || 'service operations and delivery strategy'}.\n\nRelevant evidence from my experience includes:\n- ${evidenceLines.join('\n- ')}\n\nAcross my work, I have partnered with executive stakeholders, translated research into decision-ready roadmaps, and delivered measurable improvement in service performance. I would value the opportunity to contribute that same discipline and impact in this role.\n\nSincerely,\nCara Brown`;
++      }
++
++      function buildQuestionAnswer(question, jobDescription, bestResumeName, bestMatch) {
++        const topNeeds = firstNonEmptyLines(jobDescription, 2).join(' | ');
++        const alignedWords = bestMatch.matched.slice(0, 6).join(', ') || 'service design, strategy, operations';
++
++        return `Question: ${question}\n\nSuggested answer:\nGreat question. I would answer this by connecting your concern to business impact and delivery credibility. In this role, key needs appear to be: ${topNeeds}. My ${bestResumeName} demonstrates direct alignment through ${alignedWords}. I would emphasize that I combine strategic framing with execution rigor, and then support that claim with one quantified example from recent work.`;
++      }
++
++
++      async function loadResumeFromUrl(index) {
++        const url = document.getElementById(`resumeUrl${index}`).value.trim();
++        if (!url) return;
++        const target = document.getElementById(`resumeText${index}`);
++
++        if (!url.toLowerCase().endsWith('.txt')) {
++          target.value = `Unable to auto-load ${url}. Please provide a direct public .txt file URL or paste resume text manually.`;
++          return;
++        }
++
++        try {
++          const response = await fetch(url, { method: 'GET' });
++          if (!response.ok) {
++            throw new Error(`HTTP ${response.status}`);
++          }
++          target.value = await response.text();
++        } catch (error) {
++          target.value = `Could not load URL: ${url}
++Reason: ${error.message}
++Paste resume text manually if needed.`;
++        }
++      }
++
++      async function loadAllResumeUrls() {
++        const atsOutput = document.getElementById('atsOutput');
++        atsOutput.textContent = 'Loading resume URLs...';
++        await Promise.all([1, 2, 3].map((idx) => loadResumeFromUrl(idx)));
++        atsOutput.textContent = 'Done loading URLs. Now click "Run ATS + Generate documents".';
++      }
++
++      function getResumes() {
++        return [1, 2, 3]
++          .map((idx) => ({
++            name: document.getElementById(`resumeName${idx}`).value.trim() || `Resume ${idx}`,
++            text: document.getElementById(`resumeText${idx}`).value.trim()
++          }))
++          .filter((item) => item.text);
++      }
++
++      function renderMainOutputs() {
++        const jd = document.getElementById('jobDescription').value.trim();
++        const resumes = getResumes();
++
++        const atsOutput = document.getElementById('atsOutput');
++        const fitOutput = document.getElementById('fitOutput');
++        const letterOutput = document.getElementById('coverLetterOutput');
++
++        if (!jd || !resumes.length) {
++          atsOutput.textContent = 'Please add a job description and at least one resume text.';
++          fitOutput.textContent = '';
++          letterOutput.textContent = '';
++          return;
++        }
++
++        const scored = resumes.map((resume) => ({
++          ...resume,
++          match: computeMatch(jd, resume.text)
++        }));
++
++        scored.sort((a, b) => b.match.score - a.match.score);
++        const best = scored[0];
++
++        const scoreLines = scored.map((item, index) => `${index + 1}. ${item.name}: ${item.match.score}%`).join('\n');
++        let atsText = `ATS Match Results\n${scoreLines}\n\nBest resume selected: ${best.name} (${best.match.score}%)\nTop missing keywords: ${best.match.missing.slice(0, 15).join(', ') || 'None identified'}`;
++
++        if (best.match.score < 95) {
++          const edits = buildResumeEdits(best.text, best.match.missing);
++          atsText += `\n\nBecause the top match is below 95%, here are line-by-line edits to target 98%+ alignment:\n\n${edits}`;
++        }
++
++        atsOutput.textContent = atsText;
++        fitOutput.textContent = buildFitNarrative(jd, best.name, best.match);
++        letterOutput.textContent = buildCoverLetter(jd, best.name, best.match, best.text);
++
++        window.__jobToolState = { jd, best };
++      }
++
++      function renderQuestionAnswer() {
++        const question = document.getElementById('customQuestion').value.trim();
++        const output = document.getElementById('questionOutput');
++        const state = window.__jobToolState;
++
++        if (!question) {
++          output.textContent = 'Please type a question.';
++          return;
++        }
++
++        if (!state) {
++          output.textContent = 'Run "ATS + Generate documents" first so I can use the job description and best-matching resume.';
++          return;
++        }
++
++        output.textContent = buildQuestionAnswer(question, state.jd, state.best.name, state.best.match);
++      }
++
++      document.getElementById('loadUrlsBtn').addEventListener('click', loadAllResumeUrls);
++      document.getElementById('runToolBtn').addEventListener('click', renderMainOutputs);
++      document.getElementById('answerQuestionBtn').addEventListener('click', renderQuestionAnswer);
++    </script>
++  </body>
++</html>
+ 
+EOF
+)
