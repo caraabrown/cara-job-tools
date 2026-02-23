@@ -1,1 +1,160 @@
-
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/resume-converter.html b/resume-converter.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..8d47439777f3e107de1c117676383747959054e3
+--- /dev/null
++++ b/resume-converter.html
+@@ -0,0 +1,150 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1" />
++    <title>Resume to TXT Converter | Cara Brown</title>
++    <link href="css/bootstrap.min.css" rel="stylesheet" />
++    <link href="styles.css" rel="stylesheet" />
++  </head>
++  <body>
++    <main class="container py-5">
++      <a href="index.html" class="btn btn-sm btn-outline-secondary mb-4">← Back to hub</a>
++      <h1>Resume → TXT Converter</h1>
++      <p class="text-secondary">
++        Upload a resume file and convert it into plain text for ATS checks.
++        Supports <strong>.txt</strong>, <strong>.pdf</strong>, and <strong>.docx</strong>.
++      </p>
++
++      <div class="card shadow-sm mb-4">
++        <div class="card-body">
++          <label for="resumeFile" class="form-label fw-semibold">Choose resume file</label>
++          <input id="resumeFile" class="form-control" type="file" accept=".txt,.pdf,.docx" />
++          <div class="d-flex flex-wrap gap-2 mt-3">
++            <button id="convertBtn" class="btn btn-primary">Convert to text</button>
++            <button id="copyBtn" class="btn btn-outline-primary">Copy text</button>
++            <button id="downloadBtn" class="btn btn-outline-secondary">Download .txt</button>
++          </div>
++          <p id="status" class="small text-secondary mt-3 mb-0"></p>
++        </div>
++      </div>
++
++      <div>
++        <label class="form-label fw-semibold" for="textOutput">Converted text</label>
++        <textarea id="textOutput" class="form-control" rows="16" placeholder="Converted resume text appears here..."></textarea>
++      </div>
++
++      <div class="alert alert-info mt-4 mb-0">
++        Tip: After converting, save/download as a file like
++        <code>service-designer.txt</code> and upload it to
++        <code>https://caraabrown.com/Resumes/</code>.
++      </div>
++    </main>
++
++    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.mjs" type="module"></script>
++    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
++    <script type="module">
++      import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.min.mjs';
++      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/build/pdf.worker.min.mjs';
++
++      const fileInput = document.getElementById('resumeFile');
++      const statusEl = document.getElementById('status');
++      const outputEl = document.getElementById('textOutput');
++
++      function cleanText(text) {
++        return text
++          .replace(/\u0000/g, '')
++          .replace(/[ \t]+\n/g, '\n')
++          .replace(/\n{3,}/g, '\n\n')
++          .trim();
++      }
++
++      async function extractPdfText(file) {
++        const buffer = await file.arrayBuffer();
++        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
++        const pages = [];
++
++        for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
++          const page = await pdf.getPage(pageNo);
++          const content = await page.getTextContent();
++          const pageText = content.items.map((item) => item.str).join(' ');
++          pages.push(pageText);
++        }
++
++        return pages.join('\n\n');
++      }
++
++      async function extractDocxText(file) {
++        const buffer = await file.arrayBuffer();
++        const result = await window.mammoth.extractRawText({ arrayBuffer: buffer });
++        return result.value || '';
++      }
++
++      async function convertFileToText(file) {
++        const ext = file.name.toLowerCase().split('.').pop();
++
++        if (ext === 'txt') {
++          return file.text();
++        }
++
++        if (ext === 'pdf') {
++          return extractPdfText(file);
++        }
++
++        if (ext === 'docx') {
++          return extractDocxText(file);
++        }
++
++        throw new Error('Unsupported file type. Please upload .txt, .pdf, or .docx');
++      }
++
++      document.getElementById('convertBtn').addEventListener('click', async () => {
++        const file = fileInput.files?.[0];
++        if (!file) {
++          statusEl.textContent = 'Choose a file first.';
++          return;
++        }
++
++        statusEl.textContent = `Converting ${file.name}...`;
++        outputEl.value = '';
++
++        try {
++          const raw = await convertFileToText(file);
++          const cleaned = cleanText(raw);
++          outputEl.value = cleaned;
++          statusEl.textContent = `Done. Converted ${file.name}.`;
++        } catch (error) {
++          statusEl.textContent = `Could not convert file: ${error.message}`;
++        }
++      });
++
++      document.getElementById('copyBtn').addEventListener('click', async () => {
++        if (!outputEl.value.trim()) {
++          statusEl.textContent = 'No text to copy yet.';
++          return;
++        }
++
++        await navigator.clipboard.writeText(outputEl.value);
++        statusEl.textContent = 'Copied converted text to clipboard.';
++      });
++
++      document.getElementById('downloadBtn').addEventListener('click', () => {
++        const text = outputEl.value;
++        if (!text.trim()) {
++          statusEl.textContent = 'No text to download yet.';
++          return;
++        }
++
++        const originalName = fileInput.files?.[0]?.name?.replace(/\.[^.]+$/, '') || 'resume';
++        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
++        const url = URL.createObjectURL(blob);
++        const link = document.createElement('a');
++        link.href = url;
++        link.download = `${originalName}.txt`;
++        link.click();
++        URL.revokeObjectURL(url);
++        statusEl.textContent = 'Downloaded .txt file.';
++      });
++    </script>
++  </body>
++</html>
+ 
+EOF
+)
