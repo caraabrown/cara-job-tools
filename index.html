@@ -1,9 +1,9 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/index.html b/index.html
-index ffe8017e76d8477846d9a15b6be0ec8000c76a87..0a6a6febbc166426f24cf9dcf207bf81d094fdb5 100644
+index ffe8017e76d8477846d9a15b6be0ec8000c76a87..a2bc6e358b7126c2603f854e060b4686974bb259 100644
 --- a/index.html
 +++ b/index.html
-@@ -1,570 +1,159 @@
+@@ -1,570 +1,201 @@
 -@ -0,0 +1,570 @@
  <!doctype html>
 -<html lang="en" data-bs-theme="auto">
@@ -250,8 +250,10 @@ index ffe8017e76d8477846d9a15b6be0ec8000c76a87..0a6a6febbc166426f24cf9dcf207bf81
 +        <div class="d-flex flex-wrap gap-2 mt-4">
 +          <a class="btn btn-warning btn-lg" href="mailto:hello@caraabrown.com">Book a strategy call</a>
 +          <a class="btn btn-outline-light btn-lg" href="https://linkedin.com/in/caraabrown" target="_blank" rel="noreferrer">LinkedIn</a>
++          <button id="copyLinkedinBtn" class="btn btn-outline-secondary btn-lg" type="button">Copy LinkedIn URL</button>
          </div>
 -      </nav>
++        <p id="copyFeedback" class="copy-feedback mt-2 mb-0" aria-live="polite"></p>
 +      </div>
      </header>
 +
@@ -278,7 +280,11 @@ index ffe8017e76d8477846d9a15b6be0ec8000c76a87..0a6a6febbc166426f24cf9dcf207bf81
 -            data-bs-slide-to="2"
 -            aria-label="Slide 3"
 -          ></button>
--        </div>
++      <section class="container py-4">
++        <div class="encouragement-box">
++          <p class="eyebrow mb-2">Personal note</p>
++          <p id="encouragementQuote" class="encouragement-quote mb-0">Never Give Up, Cara.</p>
+         </div>
 -        <div class="carousel-inner">
 -          <div class="carousel-item active">
 -            <svg
@@ -301,6 +307,8 @@ index ffe8017e76d8477846d9a15b6be0ec8000c76a87..0a6a6febbc166426f24cf9dcf207bf81
 -                <p class="opacity-75">
 -                  Graduated from the graduate design program ranked #2 in the world
 -                </p>
++      </section>
++
 +      <section class="container py-5">
 +        <div class="row g-4">
 +          <div class="col-md-4">
@@ -364,14 +372,14 @@ index ffe8017e76d8477846d9a15b6be0ec8000c76a87..0a6a6febbc166426f24cf9dcf207bf81
 -            <div class="container">
 -              <div class="carousel-caption text-end">
 -                <h1>Integrity.</h1>
+-                <p>
+-                  Witout it nothing works.
+-                </p>
 +          <div class="col-md-4">
 +            <div class="card h-100 metric-card shadow-sm">
 +              <div class="card-body">
 +                <h2 class="h5">Chief of Staff Partner</h2>
                  <p>
--                  Witout it nothing works.
--                </p>
--                <p>
 -                  <a class="btn btn-lg btn-primary" href="#">Browse gallery</a>
 +                  Executive operating cadence, decision support, and org-wide
 +                  operating models for teams in transition.
@@ -692,6 +700,39 @@ index ffe8017e76d8477846d9a15b6be0ec8000c76a87..0a6a6febbc166426f24cf9dcf207bf81
 +        </span>
 +      </div>
 +    </footer>
++      <script>
++      const copyBtn = document.getElementById('copyLinkedinBtn');
++      const copyFeedback = document.getElementById('copyFeedback');
++
++      const quotes = [
++        'Never Give Up, Cara.',
++        'You are built for meaningful impact.',
++        'One strong application at a time.',
++        'Your work improves real lives — keep going.',
++        'Progress over perfection. Keep moving.'
++      ];
++      let quoteIndex = 0;
++      const quoteEl = document.getElementById('encouragementQuote');
++
++      if (quoteEl) {
++        setInterval(() => {
++          quoteIndex = (quoteIndex + 1) % quotes.length;
++          quoteEl.textContent = quotes[quoteIndex];
++        }, 5000);
++      }
++
++      if (copyBtn) {
++        copyBtn.addEventListener('click', async () => {
++          const url = 'https://linkedin.com/in/caraabrown/';
++          try {
++            await navigator.clipboard.writeText(url);
++            copyFeedback.textContent = 'LinkedIn URL copied to clipboard.';
++          } catch (error) {
++            copyFeedback.textContent = `Copy failed. Use this URL manually: ${url}`;
++          }
++        });
++      }
++    </script>
    </body>
  </html>
  
