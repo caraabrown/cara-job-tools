@@ -1,135 +1,171 @@
-:root {
-  --cara-navy: #0f1c2e;
-  --cara-ink: #1d2a39;
-  --cara-teal: #2b7a78;
-  --cara-gold: #b78a31;
-  --cara-bg: #f4f7fb;
-  --cara-surface: #ffffff;
-  --cara-border: #e5eaf1;
-  --cara-muted: #5d6b7a;
-  --radius: 14px;
-  --shadow: 0 10px 30px rgba(18, 30, 48, 0.08);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: radial-gradient(circle at top right, #edf4ff, var(--cara-bg) 45%);
-  color: var(--cara-ink);
-  font-family:
-    Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  line-height: 1.55;
-}
-
-main.container {
-  max-width: 1200px;
-}
-
-h1, h2, h3 {
-  color: var(--cara-navy);
-  letter-spacing: -0.01em;
-}
-
-h1 {
-  font-weight: 750;
-  margin-bottom: 0.5rem;
-}
-
-.text-secondary {
-  color: var(--cara-muted) !important;
-}
-
-.btn {
-  border-radius: 10px;
-  font-weight: 600;
-  transition: all 0.18s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--cara-navy), #1e3c64);
-  border: none;
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(15, 28, 46, 0.25);
-}
-
-.btn-outline-primary {
-  border-color: #7b90ac;
-  color: #1c395d;
-}
-
-.form-control {
-  border: 1px solid var(--cara-border);
-  border-radius: 10px;
-  padding: 0.72rem 0.85rem;
-  font-size: 0.97rem;
-  background-color: #fff;
-}
-
-.form-control:focus {
-  border-color: #7aa8d6;
-  box-shadow: 0 0 0 0.2rem rgba(69, 130, 195, 0.15);
-}
-
-label.form-label {
-  font-weight: 650;
-  color: var(--cara-navy);
-}
-
-/* Modern “panel” look */
-.col-lg-6 > .mb-3,
-.col-lg-6 > div,
-.mt-5,
-.col-lg-6 > .mt-4 {
-  position: relative;
-}
-
-.result-box {
-  min-height: 220px;
-  white-space: pre-wrap;
-  background: var(--cara-surface);
-  border: 1px solid var(--cara-border) !important;
-  border-radius: var(--radius) !important;
-  box-shadow: var(--shadow);
-  padding: 1rem !important;
-}
-
-/* Give the two columns card feel */
-@media (min-width: 992px) {
-  .row.g-4 > .col-lg-6:first-child,
-  .row.g-4 > .col-lg-6:last-child {
-    background: var(--cara-surface);
-    border: 1px solid var(--cara-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1.2rem;
-  }
-}
-
-/* Keep older shared classes working */
-.hero-gradient {
-  background: linear-gradient(120deg, var(--cara-navy), #1f3a5f);
-}
-.section-title {
-  letter-spacing: 0.02em;
-}
-.card-hover:hover {
-  transform: translateY(-2px);
-  transition: transform 150ms ease;
-}
-.metric-card {
-  border-left: 4px solid var(--cara-teal);
-}
-.badge-soft {
-  background: rgba(43, 122, 120, 0.14);
-  color: #1b5453;
-}
-footer a {
-  text-decoration: none;
-}
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/styles.css b/styles.css
+new file mode 100644
+index 0000000000000000000000000000000000000000..a6190d3213c2d128105d5ea4e6f4d24d442854db
+--- /dev/null
++++ b/styles.css
+@@ -0,0 +1,161 @@
++@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500&display=swap');
++
++:root {
++  --black: #0d0d0b;
++  --white: #f6f5f1;
++  --off: #efede8;
++  --mid: #888680;
++  --rule: #2a2a26;
++  --ink: #1e1e1c;
++  --bg-dark: #0f1113;
++  --panel-dark: #171a1e;
++}
++
++* { box-sizing: border-box; }
++
++body {
++  font-family: 'Outfit', sans-serif;
++  font-weight: 300;
++  font-size: 16px;
++  line-height: 1.7;
++  background: var(--bg-dark);
++  color: var(--white);
++}
++
++h1, h2, h3 {
++  font-family: 'EB Garamond', serif;
++  font-weight: 400;
++  line-height: 1.1;
++  letter-spacing: -0.02em;
++  color: var(--white);
++}
++
++p { color: #d3d1cb; }
++
++a { color: var(--off); text-decoration: none; }
++a:hover { opacity: 0.7; }
++
++.hero-gradient {
++  background: linear-gradient(120deg, #0c0d0f 0%, #1a2230 60%, #1e2f49 100%);
++  border-bottom: 1px solid var(--rule);
++}
++
++.section-title {
++  font-size: clamp(1.8rem, 3vw, 2.8rem);
++}
++
++.card {
++  background: var(--panel-dark);
++  border: 1px solid var(--rule);
++  border-radius: 0;
++  color: var(--white);
++}
++
++.card .text-secondary,
++.card p,
++.card-body p {
++  color: #b7b4ad !important;
++}
++
++.card-hover:hover {
++  transform: translateY(-2px);
++  transition: transform 150ms ease;
++}
++
++.metric-card {
++  border-left: 2px solid var(--mid);
++}
++
++.badge-soft {
++  background: #2a2a26;
++  color: #c4c1bb;
++  font-size: 9px;
++  font-weight: 500;
++  letter-spacing: 0.24em;
++  text-transform: uppercase;
++}
++
++.btn {
++  font-family: 'Outfit', sans-serif;
++  font-size: 0.78rem;
++  font-weight: 500;
++  letter-spacing: 0.18em;
++  text-transform: uppercase;
++  border-radius: 0;
++  padding: 0.75rem 1rem;
++}
++
++.btn-warning {
++  background: var(--white);
++  color: var(--black);
++  border: none;
++}
++
++.btn-outline-light,
++.btn-outline-secondary,
++.btn-outline-primary {
++  border-color: var(--mid);
++  color: var(--off);
++}
++
++.btn-primary {
++  background: var(--white);
++  color: var(--black);
++  border: none;
++}
++
++.form-control {
++  background: #0f1216;
++  color: var(--off);
++  border: 1px solid #2a2a26;
++  border-radius: 0;
++}
++
++.form-control:focus {
++  background: #0f1216;
++  color: var(--off);
++  border-color: var(--mid);
++  box-shadow: none;
++}
++
++.result-box {
++  min-height: 240px;
++  white-space: pre-wrap;
++  background: #0f1216 !important;
++  border: 1px solid #2a2a26 !important;
++  color: var(--off);
++}
++
++footer {
++  background: #0d0d0b !important;
++  border-top: 1px solid var(--rule) !important;
++}
++
++footer a { text-decoration: none; }
++
++.copy-feedback {
++  font-size: 0.8rem;
++  color: #b7b4ad;
++}
++
++.eyebrow {
++  font-family: 'Outfit', sans-serif;
++  font-size: 9px;
++  font-weight: 500;
++  letter-spacing: 0.28em;
++  text-transform: uppercase;
++  color: var(--mid);
++}
++
++.encouragement-box {
++  border: 1px solid var(--rule);
++  background: linear-gradient(120deg, #14171c, #171a1e);
++  padding: 1.2rem 1.4rem;
++}
++
++.encouragement-quote {
++  font-family: 'EB Garamond', serif;
++  font-size: clamp(1.4rem, 2.2vw, 2rem);
++  line-height: 1.2;
++  color: var(--off);
++}
+ 
+EOF
+)
