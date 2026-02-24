@@ -1,0 +1,204 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/job-application-tool.html b/job-application-tool.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..9bcbcce7a1f40a775dce04df20487f02b4e917f4
+--- /dev/null
++++ b/job-application-tool.html
+@@ -0,0 +1,194 @@
++<!doctype html>
++<html lang="en">
++<head>
++  <meta charset="utf-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1" />
++  <title>Cara Job Application Tool</title>
++  <style>
++    body{font-family:Arial,sans-serif;background:#111;color:#eee;margin:0}
++    .wrap{max-width:1100px;margin:0 auto;padding:24px}
++    h1,h2{margin:.2rem 0 1rem}
++    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
++    .card{background:#1b1b1b;border:1px solid #333;padding:14px}
++    label{display:block;margin:.6rem 0 .25rem;font-weight:700}
++    input,textarea,button{width:100%;box-sizing:border-box}
++    input,textarea{background:#0f0f0f;color:#eee;border:1px solid #444;padding:9px}
++    textarea{min-height:92px}
++    button{background:#f6f5f1;color:#111;border:0;padding:10px;margin-top:8px;font-weight:700;cursor:pointer}
++    .muted{color:#bbb;font-size:.9rem}
++    .out{white-space:pre-wrap;min-height:170px;background:#0f0f0f;border:1px solid #444;padding:10px}
++    .row{display:flex;gap:8px}
++    .row > *{flex:1}
++    @media (max-width:900px){.grid{grid-template-columns:1fr}}
++  </style>
++</head>
++<body>
++<div class="wrap">
++  <h1>Cara Job Application Tool (Reliable Mode)</h1>
++  <p class="muted">No external dependencies. Built to work as a single file.</p>
++
++  <div class="grid">
++    <div class="card">
++      <label for="jd">Job Description</label>
++      <textarea id="jd" placeholder="Paste full job description..."></textarea>
++
++      <h2>Standard resume sources</h2>
++      <div class="muted">Default links are prefilled to your Resumes folder.</div>
++
++      <label>Resume 1 name</label>
++      <input id="n1" value="Service Designer Resume" />
++      <label>Resume 1 URL (.txt)</label>
++      <input id="u1" value="https://caraabrown.com/Resumes/service-designer.txt" />
++      <label>Resume 1 text</label>
++      <textarea id="t1"></textarea>
++
++      <label>Resume 2 name</label>
++      <input id="n2" value="Design Strategist Resume" />
++      <label>Resume 2 URL (.txt)</label>
++      <input id="u2" value="https://caraabrown.com/Resumes/design-strategist.txt" />
++      <label>Resume 2 text</label>
++      <textarea id="t2"></textarea>
++
++      <label>Resume 3 name</label>
++      <input id="n3" value="Chief of Staff Resume" />
++      <label>Resume 3 URL (.txt)</label>
++      <input id="u3" value="https://caraabrown.com/Resumes/chief-of-staff.txt" />
++      <label>Resume 3 text</label>
++      <textarea id="t3"></textarea>
++
++      <div class="row">
++        <button id="load">Load Resume URLs</button>
++        <button id="save">Save Standard Resumes</button>
++      </div>
++      <button id="run">Run ATS + Generate Docs</button>
++      <div class="muted" id="status"></div>
++    </div>
++
++    <div class="card">
++      <h2>ATS Result</h2>
++      <div class="out" id="ats"></div>
++
++      <h2>Why this job + why I fit</h2>
++      <div class="out" id="fit"></div>
++
++      <h2>Cover letter draft</h2>
++      <div class="out" id="letter"></div>
++    </div>
++  </div>
++
++  <div class="grid" style="margin-top:16px">
++    <div class="card">
++      <h2>Re-scan updated resume</h2>
++      <label>Updated resume text</label>
++      <textarea id="updated"></textarea>
++      <button id="rescan">Re-scan Updated Resume</button>
++      <div class="out" id="updatedOut"></div>
++    </div>
++    <div class="card">
++      <h2>Custom question</h2>
++      <label>Your question</label>
++      <textarea id="q"></textarea>
++      <button id="answer">Generate Answer</button>
++      <div class="out" id="ans"></div>
++    </div>
++  </div>
++</div>
++
++<script>
++const KEY='cara_tool_std_resumes_v2';
++const STOP=new Set(['the','and','for','with','that','this','from','your','have','has','will','into','across','team','role','work']);
++let state=null;
++
++const el=id=>document.getElementById(id);
++const lines=(t,n=6)=>(t||'').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,n);
++const tok=t=>(t||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>3 && !STOP.has(w));
++const uniq=t=>[...new Set(tok(t))];
++
++function score(jd,res){
++  const j=uniq(jd), r=new Set(uniq(res));
++  const matched=j.filter(w=>r.has(w));
++  const miss=j.filter(w=>!r.has(w));
++  const base=j.length ? (matched.length/j.length)*100 : 0;
++  const boost=(/%|kpi|sla|reduced|increased|improved/.test((res||'').toLowerCase())?4:0)+(/executive|cross-functional/.test((res||'').toLowerCase())?3:0);
++  return {score:Math.min(99,Math.round(base+boost)), matched, miss};
++}
++
++function edits(res,miss){
++  const l=lines(res,8);
++  if(!l.length) return 'Paste resume text to receive line-by-line edits.';
++  return l.map((x,i)=>`Line ${i+1}\nCurrent: ${x}\nEdit: Add "${miss[i]||'service'}" + measurable metric.`).join('\n\n');
++}
++
++async function loadOne(i){
++  const u=el('u'+i).value.trim();
++  if(!u) return;
++  if(!u.toLowerCase().endsWith('.txt')){ el('t'+i).value='Use direct public .txt URL'; return; }
++  try{ const r=await fetch(u); if(!r.ok) throw new Error('HTTP '+r.status); el('t'+i).value=await r.text(); }
++  catch(e){ el('t'+i).value=`Could not load ${u}\n${e.message}`; }
++}
++
++async function loadAll(){
++  el('status').textContent='Loading URLs...';
++  await Promise.all([1,2,3].map(loadOne));
++  el('status').textContent='Loaded resume URLs.';
++}
++
++function saveStd(){
++  const data=[1,2,3].map(i=>({name:el('n'+i).value,url:el('u'+i).value,text:el('t'+i).value}));
++  localStorage.setItem(KEY,JSON.stringify(data));
++  el('status').textContent='Saved standard resumes.';
++}
++
++function loadStd(){
++  try{
++    const data=JSON.parse(localStorage.getItem(KEY)||'null');
++    if(!data) return;
++    data.forEach((d,ix)=>{const i=ix+1; if(d.name)el('n'+i).value=d.name; if(d.url)el('u'+i).value=d.url; if(d.text)el('t'+i).value=d.text;});
++  }catch(_e){}
++}
++
++function getResumes(){
++  return [1,2,3].map(i=>({name:el('n'+i).value.trim()||('Resume '+i),text:el('t'+i).value.trim()})).filter(x=>x.text);
++}
++
++function runMain(){
++  const jd=el('jd').value.trim();
++  const rs=getResumes();
++  if(!jd||!rs.length){ el('ats').textContent='Add job description and at least one resume text.'; return; }
++  const scored=rs.map(r=>({...r,m:score(jd,r.text)})).sort((a,b)=>b.m.score-a.m.score);
++  const best=scored[0];
++  const board=scored.map((r,i)=>`${i+1}. ${r.name}: ${r.m.score}%`).join('\n');
++  let out=`ATS Match Results\n${board}\n\nBest resume: ${best.name} (${best.m.score}%)\nMissing keywords: ${best.m.miss.slice(0,15).join(', ')||'None'}`;
++  if(best.m.score<95) out += `\n\nLine-by-line edits to target 98%+:\n\n${edits(best.text,best.m.miss)}`;
++  el('ats').textContent=out;
++  el('fit').textContent=`1) Why I chose this role:\nBecause it aligns strategy + delivery + impact.\n\n2) Why I am a fit:\nMy ${best.name} overlaps with: ${best.m.matched.slice(0,8).join(', ')||'service design, strategy, operations'}.`;
++  el('letter').textContent=`Dear Hiring Team,\n\nI am excited to apply for this role. Using my ${best.name}, ATS alignment is ${best.m.score}%.\n\nTop priorities from posting:\n- ${lines(jd,4).join('\n- ')}\n\nEvidence from my resume:\n- ${lines(best.text,5).join('\n- ')}\n\nSincerely,\nCara Brown`;
++  state={jd,best};
++}
++
++function rescan(){
++  const jd=el('jd').value.trim(), txt=el('updated').value.trim();
++  if(!jd) return el('updatedOut').textContent='Add job description first.';
++  if(!txt) return el('updatedOut').textContent='Paste updated resume text first.';
++  const m=score(jd,txt);
++  el('updatedOut').textContent=`Updated ATS score: ${m.score}%\nMatched: ${m.matched.slice(0,20).join(', ')||'None'}\nMissing: ${m.miss.slice(0,20).join(', ')||'None'}`;
++}
++
++function answer(){
++  const q=el('q').value.trim();
++  if(!q) return el('ans').textContent='Type a question.';
++  if(!state) return el('ans').textContent='Run ATS + Generate Docs first.';
++  el('ans').textContent=`Question: ${q}\n\nSuggested answer:\nConnect your answer to outcomes, leadership, and role priorities. Emphasize aligned experience from ${state.best.name} and one metric-backed example.`;
++}
++
++el('load').addEventListener('click',loadAll);
++el('save').addEventListener('click',saveStd);
++el('run').addEventListener('click',runMain);
++el('rescan').addEventListener('click',rescan);
++el('answer').addEventListener('click',answer);
++
++loadStd();
++loadAll();
++</script>
++</body>
++</html>
+ 
+EOF
+)
